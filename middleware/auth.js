@@ -8,7 +8,7 @@ module.exports = async (req, res, next) => {
 
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.userId);
+    const user = await User.findById(decoded.id);
     if (!user) return res.status(401).json({ message: "User not found" });
     if (!user.isActive || user.isDelete) return res.status(403).json({ message: "User inactive or deleted" });
     if (user.isBanned) return res.status(403).json({ message: "User is banned" });

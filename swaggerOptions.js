@@ -15,6 +15,18 @@ const options = {
         url: "http://localhost:3000", // your API base url
       },
     ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+        },
+      },
+    },
+    security: [
+      { bearerAuth: [] },
+    ],
   },
   apis: ["./routes/*.js"], // Path to the files with documentation
 };
