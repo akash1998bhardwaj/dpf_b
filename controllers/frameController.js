@@ -3,20 +3,20 @@ const Frame = require('../models/frame');
 // Create new frame
 exports.createFrame = async (req, res) => {
   try {
-    const { diviceId, email } = req.body;
+    const { deviceId, email } = req.body;
     const userId = req.user.id;
 
-    if (!diviceId || !email) {
-      return res.status(400).json({ message: "diviceId and email are required" });
+    if (!deviceId || !email) {
+      return res.status(400).json({ message: "deviceId and email are required" });
     }
 
-    // Check if diviceId or email already exists
-    const existingFrame = await Frame.findOne({ $or: [{ diviceId }, { email }] });
+    // Check if deviceId or email already exists
+    const existingFrame = await Frame.findOne({ $or: [{ deviceId }, { email }] });
     if (existingFrame) {
-      return res.status(400).json({ message: "Frame with this diviceId or email already exists" });
+      return res.status(400).json({ message: "Frame with this deviceId or email already exists" });
     }
 
-    const frame = await Frame.create({ diviceId, email, userId });
+    const frame = await Frame.create({ deviceId, email, userId });
     res.status(201).json({ message: "Frame created", frame });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -49,11 +49,11 @@ exports.getFrame = async (req, res) => {
 exports.updateFrame = async (req, res) => {
   try {
     const { frameId } = req.params;
-    const { diviceId, email, isActive } = req.body;
+    const { deviceId, email, isActive } = req.body;
 
     const frame = await Frame.findOneAndUpdate(
       { _id: frameId, userId: req.user.id, isDelete: false },
-      { diviceId, email, isActive },
+      { deviceId, email, isActive },
       { new: true }
     );
 

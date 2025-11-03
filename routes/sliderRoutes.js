@@ -128,24 +128,59 @@ router.get('/', authMiddleware, sliderController.getAllSliders);
 
 /**
  * @swagger
- * /slider/{sliderId}:
+ * /slider/user:
  *   get:
- *     summary: Get a single slider by ID
+ *     summary: Get sliders available for the logged-in user's subscription plan
  *     tags: [Sliders]
- *     parameters:
- *       - in: path
- *         name: sliderId
- *         required: true
- *         schema:
- *           type: string
- *         description: Slider ID
+ *     security:
+ *       - bearerAuth: []
+ *     description: >
+ *       Returns only those sliders which match the user's subscription type.  
+ *       - **free** → sees only free sliders  
+ *       - **silver** → sees free + silver sliders  
+ *       - **gold** → sees free + silver + gold sliders  
+ *       - **fullAccess** → sees all sliders
  *     responses:
  *       200:
- *         description: Slider details
- *       404:
- *         description: Slider not found
+ *         description: Sliders accessible to the user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 sliders:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                         example: 671f4c7a3e47c19e4f55678a
+ *                       title:
+ *                         type: string
+ *                         example: "Summer Sale Banner"
+ *                       imageUrl:
+ *                         type: string
+ *                         example: "https://example.com/slider.jpg"
+ *                       category:
+ *                         type: string
+ *                         example: "silver"
+ *                       description:
+ *                         type: string
+ *                         example: "Attractive summer offers"
+ *                       active:
+ *                         type: boolean
+ *                         example: true
+ *       401:
+ *         description: User not authenticated
+ *       500:
+ *         description: Server error
  */
-router.get('/:sliderId', authMiddleware, sliderController.getSliders);
+
+router.get('/user', authMiddleware, sliderController.getSliders);
 
 /**
  * @swagger

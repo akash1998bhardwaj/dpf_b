@@ -1,13 +1,14 @@
 const express = require('express');
 const mongoose = require('mongoose');
 require('dotenv').config();
-
+const cors = require('cors');
 
 const app = express();
 app.use(express.json());
 const authRoutes = require('./routes/auth');
 const deviceRoutes = require('./routes/device');
 const sliderRoutes = require('./routes/sliderRoutes');
+const albumRoutes = require('./routes/albumRoutes');
 
 
 
@@ -16,9 +17,17 @@ const { swaggerUi, specs } = require("./swaggerOptions");
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
+
+
+app.use(cors({
+  origin: '*', // or ['http://192.168.1.56:3000'] for stricter control
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+}));
+
 app.use('/auth', authRoutes);
 app.use('/device', deviceRoutes);
 app.use('/slider', sliderRoutes);
+app.use('/album', albumRoutes);
 // MongoDB connection
 const DB_USER = process.env.DB_USER;
 const DB_PASS = process.env.DB_PASS;

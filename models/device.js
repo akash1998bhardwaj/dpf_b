@@ -23,8 +23,8 @@ const deviceSchema = new mongoose.Schema({
     ref: 'Admin', // kis admin ne add kiya
     default: null,
   },
-  activatedAt: Date,
-  deactivatedAt: Date,
+  isActive: { type: Boolean, default: true },
+  isDelete: { type: Boolean, default: false },
   isDeleted: {
     type: Boolean,
     default: false,

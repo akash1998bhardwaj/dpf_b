@@ -3,8 +3,16 @@ const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String },
-  otp: { type: String },
-  diviceId: { type: String },
+  otp: {
+    type: String, unique: true,
+    sparse: true,
+  },
+   deviceId: { 
+    type: String,
+    unique: true,
+    sparse: true,
+    default: null,  // ✅ null allows multiple users without error
+  },
   otpExpiresAt: { type: Date },
   subscriptionType: {
     type: String,

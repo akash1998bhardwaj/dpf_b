@@ -17,7 +17,9 @@ const sliderSchema = new mongoose.Schema({
         slidesPerView: { type: String, default: 1 },        // slides visible at once
         stopOnHover: { type: Boolean, default: true },      // stop autoplay on hover
     },
-    active: { type: Boolean, default: true },
+    curruntActive: { type: Boolean, default: true },
+    isActive: { type: Boolean, default: true },
+    isDelete: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now },
 });
 

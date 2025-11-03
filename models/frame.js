@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const frameSchema = new mongoose.Schema({
-    diviceId: { type: String, required: true, unique: true },
+    deviceId: { type: String, required: true, unique: true },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     email: { type: String, required: true, unique: true },
     // Common fields

@@ -5,10 +5,24 @@ exports.createSlider = async (req, res) => {
   try {
     const { title, imageUrl, category, description, active, settings } = req.body;
 
+    // 🔸 Step 1: Validate required fields
     if (!title || !imageUrl) {
-      return res.status(400).json({ message: "Title and imageUrl are required" });
+      return res.status(400).json({
+        success: false,
+        message: "Title and imageUrl are required"
+      });
     }
 
+    // 🔸 Step 2: Check for existing slider with same title
+    const existingSlider = await Slider.findOne({ title });
+    if (existingSlider) {
+      return res.status(400).json({
+        success: false,
+        message: "Slider with this title already exists",
+      });
+    }
+
+    // 🔸 Step 3: Create new slider
     const slider = await Slider.create({
       title,
       imageUrl,
@@ -22,19 +36,29 @@ exports.createSlider = async (req, res) => {
         spaceBetween: settings?.spaceBetween ?? 10,
         slidesPerView: settings?.slidesPerView ?? 1,
         stopOnHover: settings?.stopOnHover ?? true,
-      }
+      },
     });
 
-    res.status(201).json({ message: "Slider created", slider });
+    // 🔸 Step 4: Send success response
+    res.status(201).json({
+      success: true,
+      message: "Slider created successfully",
+      slider
+    });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: err.message
+    });
   }
 };
+
 
 // Get all active sliders (for admin or public)
 exports.getAllSliders = async (req, res) => {
   try {
-    const sliders = await Slider.find({ active: true }).sort({ createdAt: -1 });
+    const sliders = await Slider.find({ isActive: true }).sort({ createdAt: -1 });
     res.json({ sliders });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -62,7 +86,7 @@ exports.getSliders = async (req, res) => {
 
     const sliders = await Slider.find({
       category: { $in: allowedCategories },
-      active: true
+      isActive: true
     }).sort({ createdAt: -1 });
 
     res.json({ sliders });
@@ -75,7 +99,7 @@ exports.getSliders = async (req, res) => {
 exports.updateSlider = async (req, res) => {
   try {
     const { sliderId } = req.params;
-    const { title, imageUrl, category, description, active, settings } = req.body;
+    const { title, imageUrl, category, description, isActive, settings } = req.body;
 
     const slider = await Slider.findById(sliderId);
     if (!slider) return res.status(404).json({ message: "Slider not found" });
@@ -84,7 +108,7 @@ exports.updateSlider = async (req, res) => {
     slider.imageUrl = imageUrl ?? slider.imageUrl;
     slider.category = category ?? slider.category;
     slider.description = description ?? slider.description;
-    slider.active = active !== undefined ? active : slider.active;
+    slider.isActive = isActive !== undefined ? isActive : slider.isActive;
 
     // Update settings if provided
     if (settings) {
@@ -111,7 +135,7 @@ exports.deleteSlider = async (req, res) => {
     const { sliderId } = req.params;
     const slider = await Slider.findByIdAndUpdate(
       sliderId,
-      { active: false },
+      { isActive: false },
       { new: true }
     );
 

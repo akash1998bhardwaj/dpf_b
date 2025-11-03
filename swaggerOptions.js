@@ -12,7 +12,10 @@ const options = {
     },
     servers: [
       {
-        url: "http://localhost:3000", // your API base url
+        url: "http://localhost:8080", // your API base url
+      },
+      {
+        url: "http://192.168.1.56:8080", // your API base url
       },
     ],
     components: {

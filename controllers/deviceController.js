@@ -29,7 +29,7 @@ exports.addDevice = async (req, res) => {
 // ✅ Admin: List all devices
 exports.listDevices = async (req, res) => {
   try {
-    const devices = await Device.find().sort({ createdAt: -1 });
+    const devices = await Device.find({ isActive: true }).sort({ createdAt: -1 });
     res.json({ count: devices.length, devices });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -54,13 +54,12 @@ exports.activateDevice = async (req, res) => {
       return res.status(404).json({ message: 'Invalid Device ID' });
     }
 
-    if (device.status === 'active') {
+    if (device.isActive) {
       return res.status(400).json({ message: 'This device is already active with another user' });
     }
 
-    device.status = 'active';
+    device.isActive = true;
     device.assignedTo = userId;
-    device.activatedAt = new Date();
     await device.save();
 
     res.json({ message: 'Device activated successfully', device });
@@ -82,8 +81,7 @@ exports.deactivateDevice = async (req, res) => {
       return res.status(404).json({ message: 'Device not found' });
     }
 
-    device.status = 'inactive';
-    device.deactivatedAt = new Date();
+    device.isActive = false;
     await device.save();
 
     res.json({ message: 'Device deactivated successfully', device });
@@ -103,7 +101,6 @@ exports.deleteDevice = async (req, res) => {
     }
 
     device.isDeleted = true;
-    device.status = 'deleted';
     await device.save();
 
     res.json({ message: 'Device deleted successfully', device });

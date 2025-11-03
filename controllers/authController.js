@@ -162,31 +162,92 @@ exports.verifyOTP = async (req, res) => {
   }
 };
 
-// ✅ Verify if deviceId exists and is active
+// ✅ Verify deviceId and link to user
 exports.verifyDeviceId = async (req, res) => {
   try {
-    const { deviceId } = req.body;
+    const { deviceId, userId } = req.body;
 
-    if (!deviceId) {
-      return res.status(400).json({ success: false, message: 'deviceId is required' });
+    // 🔸 Step 1: Validate required fields
+    if (!deviceId || !userId) {
+      return res.status(400).json({
+        success: false,
+        message: 'deviceId and userId are required',
+      });
     }
 
+    // 🔸 Step 2: Check if device exists in Device collection
     const device = await Device.findOne({ deviceId });
 
     if (!device) {
-      return res.status(404).json({ success: false, message: 'Invalid deviceId' });
+      return res.status(404).json({
+        success: false,
+        message: 'Invalid deviceId',
+      });
     }
 
     if (!device.isActive) {
-      return res.status(403).json({ success: false, message: 'Device is inactive' });
+      return res.status(403).json({
+        success: false,
+        message: 'Device is inactive',
+      });
     }
 
-    res.status(200).json({ success: true, message: 'Device verified successfully', device });
+    // 🔸 Step 3: Find user
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+      });
+    }
+
+    // 🔸 Step 4: Check if this deviceId is already linked to another user
+    const existingDeviceUser = await User.findOne({
+      deviceId,
+    });
+
+
+    if (existingDeviceUser) {
+      return res.status(200).json({
+        success: false,
+        message: 'Device ID already linked to another user',
+      });
+    }
+
+    // 🔸 Step 5: Link the deviceId to the user
+    user.deviceId = deviceId;
+    await user.save();
+
+    // Generate JWT Token
+    const token = jwt.sign(
+      { id: user._id, role: 'user' },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' } // token valid for 7 days
+    );
+
+
+    // 🔸 Step 6: Success response
+    return res.status(200).json({
+      success: true,
+      message: 'Device verified and linked to user successfully',
+      token,
+      user: {
+        id: user._id,
+        email: user.email,
+      },
+    });
+
   } catch (error) {
     console.error('Device verification error:', error);
-    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+    return res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message,
+    });
   }
 };
+
+
 
 // ✅ Optional: Register a new device
 exports.registerDevice = async (req, res) => {
@@ -209,5 +270,64 @@ exports.registerDevice = async (req, res) => {
   } catch (error) {
     console.error('Device registration error:', error);
     res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+};
+
+exports.userLogin = async (req, res) => {
+  try {
+    const { email, deviceId } = req.body;
+
+    // Check for missing fields
+    if (!email || !deviceId) {
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
+
+    // ✅ Step 1: Find user by email
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found. Please log in to the app and create an account first.',
+      });
+    }
+
+    // ✅ Step 2: Check if deviceId exists and matches
+    if (user.deviceId !== deviceId) {
+      const deviceExists = await User.findOne({ deviceId });
+
+      if (!deviceExists) {
+        return res.status(404).json({
+          success: false,
+          message: 'Device ID not found. Please log in to the app and create an account first.',
+        });
+      }
+
+      return res.status(400).json({
+        success: false,
+        message: 'Device ID belongs to another user.',
+      });
+    }
+    // Generate JWT Token
+    const token = jwt.sign(
+      { id: user._id, role: 'user' },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' } // token valid for 7 days
+    );
+
+    // Return response
+    res.json({
+      message: 'Login successful',
+      statusCode: 200,
+      user: {
+        token,
+        id: user._id,
+        email: user.email,
+      },
+    });
+
+  } catch (error) {
+    console.error('Admin Login Error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };

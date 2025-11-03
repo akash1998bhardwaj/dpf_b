@@ -3,11 +3,11 @@ const Album = require('../models/album');
 // Create new album
 exports.createAlbum = async (req, res) => {
   try {
-    const { name } = req.body;
+    const { name, userId } = req.body;
     if (!name) return res.status(400).json({ message: "Album name is required" });
 
     const album = await Album.create({
-      userId: req.user.id,
+      userId: userId,
       name,
       isActive: true,
       isDelete: false,
