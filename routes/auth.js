@@ -84,7 +84,7 @@ router.post('/register', authController.registerAdmin);
  *             properties:
  *               email:
  *                 type: string
- *                 example: admin@example.com
+ *                 example: admin@dpf.com
  *               password:
  *                 type: string
  *                 example: 123456

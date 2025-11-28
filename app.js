@@ -9,7 +9,7 @@ const authRoutes = require('./routes/auth');
 const deviceRoutes = require('./routes/device');
 const sliderRoutes = require('./routes/sliderRoutes');
 const albumRoutes = require('./routes/albumRoutes');
-
+const uploadRoute = require("./routes/uploadRoute");
 
 
 
@@ -20,14 +20,17 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
 
 app.use(cors({
-  origin: '*', // or ['http://192.168.1.56:3000'] for stricter control
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  origin: "*", // or your domain
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
 app.use('/auth', authRoutes);
 app.use('/device', deviceRoutes);
 app.use('/slider', sliderRoutes);
 app.use('/album', albumRoutes);
+app.use("/upload", uploadRoute);
+
 // MongoDB connection
 const DB_USER = process.env.DB_USER;
 const DB_PASS = process.env.DB_PASS;
@@ -40,8 +43,8 @@ mongoose.connect(MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
-.then(() => console.log('✅ MongoDB connected'))
-.catch((err) => console.error('❌ DB connection error:', err));
+  .then(() => console.log('✅ MongoDB connected'))
+  .catch((err) => console.error('❌ DB connection error:', err));
 
 // Routes
 // app.use('/api/users', userRoutes);

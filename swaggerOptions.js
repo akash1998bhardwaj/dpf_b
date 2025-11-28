@@ -17,6 +17,9 @@ const options = {
       {
         url: "http://192.168.1.56:8080", // your API base url
       },
+      {
+        url: "http://10.95.1.133:8080", // your API base url
+      },
     ],
     components: {
       securitySchemes: {

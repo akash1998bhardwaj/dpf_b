@@ -82,7 +82,7 @@ exports.adminLogin = async (req, res) => {
     // Find admin by email
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(404).json({ message: 'Admin not found' });
+      return res.status(404).json({ message: 'User not found' });
     }
 
     // Compare password
@@ -101,6 +101,7 @@ exports.adminLogin = async (req, res) => {
     // Return response
     res.json({
       message: 'Login successful',
+      statusCode: 200,
       token,
       user: {
         id: user._id,

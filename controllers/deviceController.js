@@ -19,7 +19,7 @@ exports.addDevice = async (req, res) => {
       addedBy: req.user?._id || null, // admin id (if auth added)
     });
 
-    res.status(201).json({ message: 'Device added successfully', device });
+    res.status(201).json({ message: 'Device added successfully', device, statusCode: 200 });
   } catch (error) {
     console.error('Error adding device:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -28,9 +28,10 @@ exports.addDevice = async (req, res) => {
 
 // ✅ Admin: List all devices
 exports.listDevices = async (req, res) => {
+  console.log('divice', req)
   try {
-    const devices = await Device.find({ isActive: true }).sort({ createdAt: -1 });
-    res.json({ count: devices.length, devices });
+    const devices = await Device.find({ isActive: true, isDeleted: false }).sort({ createdAt: -1 });
+    res.json({ count: devices.length, devices, statusCode: 200 });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }

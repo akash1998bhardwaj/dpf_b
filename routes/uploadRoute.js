@@ -1,12 +1,12 @@
 const express = require('express');
-const { uploadFile } = require('../controllers/uploadController');
-const upload = require('../middleware/uploadImage');
+const { upload } = require("../middleware/uploadImage");
+const { uploadImage } = require("../controllers/uploadController");
 const authMiddleware = require('../middleware/auth');
 const router = express.Router();
 
 /**
  * @swagger
- * /upload:
+ * /upload/upload:
  *   post:
  *     summary: Upload a file to S3
  *     description: Uploads a file to AWS S3 using Multer and Multer-S3
@@ -33,6 +33,7 @@ const router = express.Router();
  *                 fileUrl:
  *                   type: string
  */
-router.post('/upload', authMiddleware, upload.single('image'), uploadFile);
+router.post('/upload', authMiddleware, upload.single('image'), uploadImage);
+
 
 module.exports = router;
