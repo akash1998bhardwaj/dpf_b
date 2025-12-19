@@ -1,26 +1,28 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const sliderSchema = new mongoose.Schema({
-    title: { type: String, required: true },
-    imageUrl: { type: String, required: true },
-    category: {
-        type: String,
-        enum: ['free', 'silver', 'gold', 'premium'],
-        default: 'free'
-    },
-    description: { type: String },
-    settings: {
-        autoplay: { type: Boolean, default: true },           // auto play enable/disable
-        delay: { type: Number, default: 3000 },              // delay in ms
-        loop: { type: Boolean, default: true },             // loop slider
-        spaceBetween: { type: Number, default: 10 },        // px between slides
-        slidesPerView: { type: String, default: 1 },        // slides visible at once
-        stopOnHover: { type: Boolean, default: true },      // stop autoplay on hover
-    },
-    curruntActive: { type: Boolean, default: true },
-    isActive: { type: Boolean, default: true },
-    isDelete: { type: Boolean, default: false },
-    createdAt: { type: Date, default: Date.now },
-});
+const sliderSchema = new mongoose.Schema(
+    {
+        title: {
+            type: String,
+            default:''
+        },
+        categoryId: {
+            type: mongoose.Schema.Types.ObjectId,
+        },
+        plan: {
+            type: String,
+            enum: ["free", "silver", "gold", "premium"],
+            default: "free"
+        },
+        isActive: {
+            type: Boolean,
+            default: true
+        },
+        isDeleted: {
+            type: Boolean,
+            default: false
+        }
+    }
+);
 
-module.exports = mongoose.model('Slider', sliderSchema);
+module.exports = mongoose.model("Slider", sliderSchema);

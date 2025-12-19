@@ -3,7 +3,7 @@ const Slider = require('../models/Slider');
 // Create new slider
 exports.createSlider = async (req, res) => {
   try {
-    const { title, imageUrl, category, description, active, settings } = req.body;
+    const { title, imageUrl, plan, description, active, settings } = req.body;
 
     // 🔸 Step 1: Validate required fields
     if (!title || !imageUrl) {
@@ -26,7 +26,7 @@ exports.createSlider = async (req, res) => {
     const slider = await Slider.create({
       title,
       imageUrl,
-      category: category || 'free',
+      plan: plan || 'free',
       description: description || '',
       active: active !== undefined ? active : true,
       settings: {
