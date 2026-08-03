@@ -178,6 +178,9 @@ router.post('/send-otp', authController.sendOTP);
  *               otp:
  *                 type: string
  *                 example: "123456"
+ *               isVerified:
+ *                 type: boolean
+ *                 example: false
  *     responses:
  *       200:
  *         description: OTP verified successfully
@@ -203,7 +206,7 @@ router.post('/verify-otp', authController.verifyOTP);
  *   post:
  *     summary: Verify a device and link it to a user
  *     tags:
- *       - Device
+ *       - Auth
  *     description: This endpoint verifies a device by its deviceId and links it to a user account if valid and active.
  *     requestBody:
  *       required: true
@@ -307,7 +310,7 @@ router.post('/verify', authController.verifyDeviceId);
  *   post:
  *     summary: User login using email and deviceId
  *     tags:
- *       - Auth
+ *       - Device User Login
  *     description: Authenticates a user based on email and deviceId, then returns a JWT token if successful.
  *     requestBody:
  *       required: true

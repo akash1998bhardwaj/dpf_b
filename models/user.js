@@ -7,11 +7,10 @@ const userSchema = new mongoose.Schema({
     type: String, unique: true,
     sparse: true,
   },
-   deviceId: { 
+  deviceId: {
     type: String,
     unique: true,
-    sparse: true,
-    default: null,  // ✅ null allows multiple users without error
+    sparse: true
   },
   otpExpiresAt: { type: Date },
   subscriptionType: {
@@ -19,6 +18,7 @@ const userSchema = new mongoose.Schema({
     enum: ['free', 'silver', 'gold', 'fullAccess'],
     default: 'free',
   },
+  isVerified: { type: Boolean, default: false },
   isActive: { type: Boolean, default: true },
   isDelete: { type: Boolean, default: false },
   isBanned: { type: Boolean, default: false },

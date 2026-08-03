@@ -121,20 +121,22 @@ exports.sendOTP = async (req, res) => {
     const { email } = req.body;
 
     let user = await User.findOne({ email });
+
     if (!user) {
       user = new User({ email });
     }
 
-    // Generate OTP
     const otp = generateOTP();
+
     user.otp = otp;
-    user.otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes expiry
+    user.otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000);
+
     await user.save();
 
-    // Send OTP email
     await sendOTPEmail(email, otp);
 
     res.json({ message: 'OTP sent to your email' });
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -143,7 +145,7 @@ exports.sendOTP = async (req, res) => {
 // Verify OTP
 exports.verifyOTP = async (req, res) => {
   try {
-    const { email, otp } = req.body;
+    const { email, otp, isVerified } = req.body;
 
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ error: 'User not found' });
@@ -155,6 +157,7 @@ exports.verifyOTP = async (req, res) => {
     // OTP verified → clear it
     user.otp = null;
     user.otpExpiresAt = null;
+    user.isVerified = isVerified;
     await user.save();
 
     res.json({ message: 'Login successful', userId: user._id });
@@ -278,57 +281,84 @@ exports.userLogin = async (req, res) => {
   try {
     const { email, deviceId } = req.body;
 
-    // Check for missing fields
     if (!email || !deviceId) {
-      return res.status(400).json({ message: 'Email and password are required' });
+      return res.status(400).json({
+        success: false,
+        message: 'Email and deviceId are required'
+      });
     }
 
-    // ✅ Step 1: Find user by email
+    // 🔎 Find user
     const user = await User.findOne({ email });
 
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'User not found. Please log in to the app and create an account first.',
+        message: 'User not found. Please create account from mobile app first.'
       });
     }
 
-    // ✅ Step 2: Check if deviceId exists and matches
+    /**
+     * ✅ STEP 1 — First time binding
+     */
+    if (!user.deviceId) {
+      user.deviceId = deviceId;
+      await user.save();
+    }
+
+    /**
+     * ❌ STEP 2 — Block if different device
+     */
     if (user.deviceId !== deviceId) {
-      const deviceExists = await User.findOne({ deviceId });
-
-      if (!deviceExists) {
-        return res.status(404).json({
-          success: false,
-          message: 'Device ID not found. Please log in to the app and create an account first.',
-        });
-      }
-
-      return res.status(400).json({
+      return res.status(403).json({
         success: false,
-        message: 'Device ID belongs to another user.',
+        message: 'This account is already registered on another device.'
       });
     }
-    // Generate JWT Token
+
+    /**
+     * ✅ STEP 3 — Ensure device record exists
+     */
+    let device = await Device.findOne({ deviceId });
+
+    if (!device) {
+      device = new Device({
+        deviceId,
+        userId: user._id
+      });
+    } else {
+      device.userId = user._id;
+    }
+
+    await device.save();
+
+    /**
+     * ✅ STEP 4 — Generate token
+     */
     const token = jwt.sign(
-      { id: user._id, role: 'user' },
+      { id: user._id, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: '7d' } // token valid for 7 days
+      { expiresIn: '7d' }
     );
 
-    // Return response
-    res.json({
+    /**
+     * ✅ RESPONSE
+     */
+    res.status(200).json({
+      success: true,
       message: 'Login successful',
-      statusCode: 200,
+      token,
       user: {
-        token,
         id: user._id,
-        email: user.email,
-      },
+        email: user.email
+      }
     });
 
   } catch (error) {
-    console.error('Admin Login Error:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
+    console.error('Login Error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
   }
 };

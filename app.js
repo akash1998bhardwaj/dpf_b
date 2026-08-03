@@ -37,7 +37,7 @@ const DB_PASS = process.env.DB_PASS;
 const DB_CLUSTER = process.env.DB_CLUSTER;
 const DB_NAME = process.env.DB_NAME;
 
-const MONGO_URI = `mongodb+srv://${DB_USER}:${DB_PASS}@${DB_CLUSTER}/${DB_NAME}?retryWrites=true&w=majority`;
+const MONGO_URI = `mongodb+srv://${DB_USER}:${DB_PASS}@cluster0.o8jkzpx.mongodb.net/${DB_NAME}?retryWrites=true&w=majority`;
 
 mongoose.connect(MONGO_URI, {
   useNewUrlParser: true,
